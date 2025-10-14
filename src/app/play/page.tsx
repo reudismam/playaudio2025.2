@@ -1,29 +1,32 @@
+'use client'
+
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function Play() {
-  return (
- <div className="w-[100vw] h-[100vh] bg-black flex justify-center items-center">
-        <div className="w-[25vw] h-[80vh] bg-[#bbbbbb] rounded-[10px]">
-            <div class="w-[100%] h-[60%] outline-1 border-[tomato] border-solid">
-                <div class="w-[100%] h-[70%] bg-pink border-[blue] border-solid">
-                   <Image className="w-[100%]"
-                             src="/music.jpg"
-                             alt="Imagem de alguem tocando violao"
-                             width={180}
-                             height={38}
-                             priority
-                           />
-                </div>
-                <div className="flex flex-col items-center">
-                     <h1 className="text-black text-[20px] font-[500] m-0">Meu violão</h1>
-                     <h2 className="text-center text-black text-[20px] font-[500];
-    margin: 0;">Artista desconhecido</h2>
-                </div>
-            </div>
-            <div className="">
 
-            </div>
-        </div>
-    </div>
+  let [contador, setContador] = useState<number>(0);
+
+  useEffect(()=>{
+      alert(contador);
+  }, [contador]);
+
+  const increment = () => {
+    setContador(contador + 1);
+    console.log(contador);
+  }
+  
+  function decrement() {
+    setContador(contador - 1);
+    console.log(contador);
+  }
+
+  return (
+     <div className="flex h-[100vh] flex-col items-center justify-center">
+      <button onClick={e => increment()} className="bg-blue-500 w-[300px]">Incrementar</button>
+      <button onClick={e => decrement()} className="m-4 bg-blue-500 w-[300px]">Decrementar</button>
+      <h1 className="text-center m-4">{contador}</h1>
+
+     </div>
   );
 }
