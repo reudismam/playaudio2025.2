@@ -3,15 +3,24 @@
 import { useEffect, useState } from "react";
 import { FaPlay } from "react-icons/fa";
 import { FaPause } from "react-icons/fa6";
+import musics from "../data/data";
+import Image from "next/image";
+
 export default function Play() {
   const [audio, setAudio] = useState<HTMLAudioElement>();
   const [playing, isPlaying] = useState<boolean>(false);
   const [gain, setGain] = useState<GainNode>();
   const [volume, setVolume] = useState<number>(1);
-
+  const [audioIndex, setAudioIndex] = useState<number>(0);
   useEffect(()=>{
-    configAudio("./audios/audio1.mp3");
+    configAudio(0);
   }, []);
+
+  useEffect(() => {
+      if  (playing) {
+        play()
+      }
+  }, [audio])
 
   const configVolume = (newValue: number) => {
     if (gain) {
@@ -20,10 +29,12 @@ export default function Play() {
     setVolume(newValue);
   }
   
-  const configAudio = (url: string) => {
-    const newAudio = new Audio(url);  
+  const configAudio = (index:number) => {
+    const newIndex = index % musics.length;
+    const newAudio = new Audio(musics[index].url);  
+    pause();
+    setAudioIndex(newIndex);
     setAudio(newAudio);
-
     const audioContext = new AudioContext();
     const media = audioContext.createMediaElementSource(newAudio);
     const newGanho = audioContext.createGain();
@@ -55,6 +66,24 @@ export default function Play() {
   }
   return (
      <div className="flex h-[100vh] flex-col items-center justify-center">
+      <div>
+        {
+          musics.map((music, index) => {
+              return (
+                <div key={index} onClick={e => configAudio(index)}>
+                  <Image 
+                     alt={"Áudio 1"}
+                     src={music.image}
+                     width={180}
+                     height={36}
+                  />
+                 <h1 className="text-center"> {music.name} </h1>
+                </div>
+              )
+          })
+        }
+      </div>
+      
       <button onClick={e => playPause()}>
          {
           playing ? 
@@ -73,6 +102,9 @@ export default function Play() {
         />
       </div>
 
+      <div>
+        <h1>{`Musica tocando: ${musics[audioIndex].name}`}</h1>
+      </div>
      </div>
   );
 }
