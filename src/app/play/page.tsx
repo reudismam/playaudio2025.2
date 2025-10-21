@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { FaPlay } from "react-icons/fa";
+import { FaBackward, FaForward, FaPlay } from "react-icons/fa";
 import { FaPause } from "react-icons/fa6";
 import musics from "../data/data";
 import Image from "next/image";
@@ -12,6 +12,8 @@ export default function Play() {
   const [gain, setGain] = useState<GainNode>();
   const [volume, setVolume] = useState<number>(1);
   const [audioIndex, setAudioIndex] = useState<number>(0);
+  const [totalTime, setTotalTime] =  useState<number>(0);
+  const [currentTime, setCurrentTime] = useState<number>(0);
   useEffect(()=>{
     configAudio(0);
   }, []);
@@ -20,18 +22,47 @@ export default function Play() {
       if  (playing) {
         play()
       }
+      if (audio) {
+        audio.onloadedmetadata = () => {
+          setTotalTime(audio.duration);
+        }
+        audio.ontimeupdate = () => {
+          setCurrentTime(audio.currentTime);
+        }
+        audio.onended = () => {
+          configAudio(audioIndex + 1);
+        }
+      }
   }, [audio])
 
+  const formatTime = (value: number) => {
+    const minutes = Math.trunc(value / 60)
+    const seconds = Math.trunc(value % 60)
+    return `${('0'+minutes).slice(-2)}:${('0'+seconds).slice(-2)}`
+  }
   const configVolume = (newValue: number) => {
     if (gain) {
       gain.gain.value = newValue;
     }
     setVolume(newValue);
   }
+
+   const decrementaMUsica = () => {
+    if (audio) {
+      audio.currentTime = currentTime - 10;
+      setCurrentTime(audio.currentTime);
+    }
+  }
+  const incrementaMUsica = () => {
+    if (audio) {
+      audio.currentTime = currentTime + 10;
+      setCurrentTime(audio.currentTime);
+    }
+  }
   
   const configAudio = (index:number) => {
     const newIndex = index % musics.length;
-    const newAudio = new Audio(musics[index].url);  
+    const newAudio = new Audio(musics[newIndex].url);  
     pause();
     setAudioIndex(newIndex);
     setAudio(newAudio);
@@ -41,6 +72,13 @@ export default function Play() {
     media.connect(newGanho);
     newGanho.connect(audioContext.destination);
     setGain(newGanho);
+  }
+
+  const configTime = (value:number) => { 
+    if (audio) {
+      audio.currentTime = value;
+      setCurrentTime(value);
+    }
   }
 
   const playPause = () => {
@@ -91,6 +129,12 @@ export default function Play() {
              : <FaPlay className="text-blue-400"/>
          }
       </button>
+      <button onClick={e => decrementaMUsica()}>
+        <FaBackward />
+      </button>
+      <button onClick={e => incrementaMUsica()}>
+        <FaForward />
+      </button>
       <div>
         <input 
         type="range" 
@@ -101,7 +145,18 @@ export default function Play() {
          onChange={e=> configVolume(Number(e.target.value))}
         />
       </div>
-
+      <div>
+        <input 
+          type="range"
+          min={0}
+          max={totalTime}
+          value={currentTime}
+          onChange={e => configTime(Number(e.target.value))}
+        />
+      </div>
+      <div>
+        {`${formatTime(currentTime)}/${formatTime(totalTime)}`}
+      </div>
       <div>
         <h1>{`Musica tocando: ${musics[audioIndex].name}`}</h1>
       </div>
